@@ -74,4 +74,4 @@ The system consists of **3 separate LangGraph pipelines**:
 
 A visual overview of the Career Advisor Pipeline is available in the accompanying presentation file:
 
-- **[Career Advisor Pipeline Presentation (PDF/Slides)](path/to/presentation.pdf)**
+- **[Career Advisor Pipeline Presentation (PDF/Slides)](Presentation.pdf)**
