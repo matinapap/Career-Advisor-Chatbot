@@ -2,7 +2,8 @@ gradio>=5.0,<6
 PyPDF2>=3.0,<4
 pydantic>=2.7,<3
 pytest>=8.0,<9
-requests>=2.31,<3
+# Keep aligned with Google Colab's pinned dependency.
+requests==2.32.4
 
 # Open-source local LLM runtime for Google Colab.
 torch>=2.2,<3
