@@ -91,23 +91,61 @@ Replace `YOUR_USERNAME` with the GitHub account that hosts the repo.
 !pip install -r requirements.txt
 ```
 
-4. Use a GPU runtime:
+4. Set the project root on the Python path:
+
+```python
+import os
+import sys
+from pathlib import Path
+
+def find_project_root():
+    candidates = [Path.cwd(), *Path.cwd().parents, Path("/content/Career-Advisor-Chatbot")]
+    for candidate in candidates:
+        if (candidate / "career_advisor").is_dir() and (candidate / "requirements.txt").is_file():
+            return candidate
+    raise RuntimeError("Run the clone/%cd cell first.")
+
+PROJECT_ROOT = find_project_root()
+os.chdir(PROJECT_ROOT)
+os.environ["PYTHONPATH"] = str(PROJECT_ROOT)
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+```
+
+5. Use a GPU runtime:
 
 ```text
 Runtime -> Change runtime type -> T4 GPU
 ```
 
-5. Optional: add `SERPAPI_KEY` in Colab Secrets if you want live course search. Without it, the app still runs, but course search returns a missing-key message.
+6. Optional: add `SERPAPI_KEY` in Colab Secrets if you want live course search. Without it, the app still runs, but course search returns a missing-key message.
 
-6. Run tests:
+7. Run tests:
 
 ```python
-!pytest -q
+!PYTHONPATH=$PWD pytest -q
 ```
 
-7. Launch the UI:
+8. Launch the UI:
 
 ```python
+import os
+import sys
+from pathlib import Path
+
+def find_project_root():
+    candidates = [Path.cwd(), *Path.cwd().parents, Path("/content/Career-Advisor-Chatbot")]
+    for candidate in candidates:
+        if (candidate / "career_advisor").is_dir() and (candidate / "requirements.txt").is_file():
+            return candidate
+    raise RuntimeError("Run the clone/%cd cell first.")
+
+PROJECT_ROOT = find_project_root()
+os.chdir(PROJECT_ROOT)
+os.environ["PYTHONPATH"] = str(PROJECT_ROOT)
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
 from career_advisor.app import demo
 
 demo.launch(share=True, debug=False)

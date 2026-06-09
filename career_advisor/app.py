@@ -9,6 +9,43 @@ from career_advisor.preferences import (
 )
 
 
+def run_pipeline_for_ui(
+    user_profile,
+    chosen_role,
+    resume_file,
+    session_state,
+    mode,
+    learning_style,
+    career_goals,
+):
+    if not user_profile or not user_profile.strip():
+        yield "⚠️ Please add your profile/description before submitting.", session_state
+        return
+
+    yield (
+        "⏳ Running the career advisor pipeline...\n\n"
+        "The first run can take a few minutes in Colab while the open-source model "
+        "and embeddings are downloaded and loaded.",
+        session_state,
+    )
+
+    try:
+        result_markdown, new_state = full_pipeline(
+            user_profile=user_profile,
+            chosen_role=chosen_role,
+            resume_file=resume_file,
+            session_state=session_state,
+            mode=mode,
+            learning_style=learning_style,
+            career_goals=career_goals,
+        )
+    except Exception as exc:
+        yield f"❌ Pipeline error:\n\n```text\n{exc}\n```", session_state
+        return
+
+    yield result_markdown, new_state
+
+
 def toggle_personalization_fields(mode):
     show = mode == "personalized"
     if show:
@@ -60,7 +97,7 @@ with gr.Blocks(css=".gr-button { width: 100% !important; }") as demo:
     clear_btn = gr.Button("🧹 Clear")
 
     submit_btn.click(
-        fn=full_pipeline,
+        fn=run_pipeline_for_ui,
         inputs=[
             profile,
             role,
@@ -87,6 +124,8 @@ with gr.Blocks(css=".gr-button { width: 100% !important; }") as demo:
         ],
     )
 
+
+demo.queue(default_concurrency_limit=1)
 
 if __name__ == "__main__":
     demo.launch(share=False, debug=False)
