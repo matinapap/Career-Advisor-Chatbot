@@ -13,7 +13,6 @@ from career_advisor.prompts import (
     learning_path_prompt,
     personalized_learning_prompt,
     resume_feedback_prompt,
-    role_description_prompt,
     skill_gap_prompt,
     skill_keywords_prompt,
 )
@@ -103,8 +102,13 @@ def suggest_resume_improvements(resume_text: str) -> str:
     return clean_output(llm_run(resume_feedback_prompt(resume_text, context)))
 
 
-def interview_agent(user_profile: str, chosen_role: str, resume_text: Optional[str] = None) -> str:
-    skills_summary = analyze_profile(user_profile)
+def interview_agent(
+    user_profile: str,
+    chosen_role: str,
+    resume_text: Optional[str] = None,
+    skills_summary: Optional[str] = None,
+) -> str:
+    skills_summary = skills_summary or analyze_profile(user_profile)
     rag_context = search_resume_tips(resume_text or user_profile)
     prompt = interview_prompt(user_profile, chosen_role, skills_summary, rag_context)
     return clean_output(llm_run(prompt))
@@ -124,8 +128,8 @@ def extract_skill_keywords(skill_gaps: str, target_role: str) -> list[str]:
 
 
 def personalized_learning(user_skills_text: str, target_role: str, personalization_info: dict) -> str:
-    role_description = llm_run(role_description_prompt(target_role))
-    skill_gaps = llm_run(skill_gap_prompt(user_skills_text, role_description))
+    role_requirements = f"Ρόλος στόχος: {target_role}"
+    skill_gaps = llm_run(skill_gap_prompt(user_skills_text, role_requirements))
     learning_plan = llm_run(
         personalized_learning_prompt(
             target_role=target_role,

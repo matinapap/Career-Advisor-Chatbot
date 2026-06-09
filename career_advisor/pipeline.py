@@ -81,10 +81,16 @@ personalized_learning_node = node_wrapper(
 )
 interview_node = node_wrapper(
     "interview_questions",
-    lambda profile, role, resume_text: interview_agent(profile, role, resume_text or profile),
+    lambda profile, role, resume_text, skills: interview_agent(
+        profile,
+        role,
+        resume_text or profile,
+        skills,
+    ),
     "profile",
     "role",
     "resume_text",
+    "skills",
 )
 
 

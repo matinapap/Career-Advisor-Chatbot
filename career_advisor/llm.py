@@ -10,6 +10,7 @@ from pydantic import BaseModel
 
 from career_advisor.config import (
     GEMINI_MODEL_NAME,
+    HF_INPUT_MAX_TOKENS,
     HF_MAX_NEW_TOKENS,
     HF_MODEL_ID,
     HF_TEMPERATURE,
@@ -70,6 +71,7 @@ def get_hf_model():
     _hf_model = AutoModelForCausalLM.from_pretrained(HF_MODEL_ID, **model_kwargs)
     if not torch.cuda.is_available():
         _hf_model.to("cpu")
+    _hf_model.eval()
 
     return _hf_model, _hf_tokenizer
 
@@ -106,7 +108,12 @@ def hf_generate(prompt: str) -> str:
     else:
         formatted_prompt = f"{system_prompt}\n\nUser:\n{prompt}\n\nAssistant:\n"
 
-    inputs = tokenizer(formatted_prompt, return_tensors="pt")
+    inputs = tokenizer(
+        formatted_prompt,
+        return_tensors="pt",
+        truncation=True,
+        max_length=HF_INPUT_MAX_TOKENS,
+    )
     device = "cuda" if torch.cuda.is_available() else "cpu"
     inputs = {key: value.to(device) for key, value in inputs.items()}
 
@@ -117,6 +124,7 @@ def hf_generate(prompt: str) -> str:
             do_sample=HF_TEMPERATURE > 0,
             temperature=HF_TEMPERATURE,
             top_p=HF_TOP_P,
+            use_cache=True,
             pad_token_id=tokenizer.eos_token_id,
         )
 

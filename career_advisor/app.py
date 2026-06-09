@@ -18,10 +18,13 @@ def run_pipeline_for_ui(
     learning_style,
     career_goals,
 ):
+    print("[career-advisor] Submit clicked.", flush=True)
     if not user_profile or not user_profile.strip():
+        print("[career-advisor] Empty profile; stopping.", flush=True)
         yield "⚠️ Please add your profile/description before submitting.", session_state
         return
 
+    print(f"[career-advisor] Running mode={mode!r}.", flush=True)
     yield (
         "⏳ Running the career advisor pipeline...\n\n"
         "The first run can take a few minutes in Colab while the open-source model "
@@ -40,9 +43,11 @@ def run_pipeline_for_ui(
             career_goals=career_goals,
         )
     except Exception as exc:
+        print(f"[career-advisor] Pipeline error: {exc}", flush=True)
         yield f"❌ Pipeline error:\n\n```text\n{exc}\n```", session_state
         return
 
+    print("[career-advisor] Pipeline completed.", flush=True)
     yield result_markdown, new_state
 
 

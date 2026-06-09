@@ -8,7 +8,7 @@ The project is organized as a normal Python package with one lightweight Colab n
 
 ## ✨ Features
 
-- **Open-source Greek-capable LLM by default**: `ilsp/Meltemi-7B-Instruct-v1`
+- **Open-source Colab-friendly LLM by default**: `Qwen/Qwen2.5-0.5B-Instruct`
 - **Optional Gemini fallback** via `LLM_PROVIDER=gemini`
 - **LangGraph pipelines** for career guidance workflows
 - **Pydantic structured outputs** for role and skill parsing
@@ -17,7 +17,7 @@ The project is organized as a normal Python package with one lightweight Colab n
 - **Gradio UI** for an interactive demo
 - **Unit tests** for core helpers and structured parsing
 
-The default model is ILSP's Meltemi 7B Instruct, a Greek/English text-generation model published on Hugging Face with an Apache-2.0 license. For Colab, use a GPU runtime such as T4.
+The default model is a small open Hugging Face instruct model so the demo responds faster and is less likely to crash a free Colab runtime. For stronger output, you can override `HF_MODEL_ID=Qwen/Qwen2.5-1.5B-Instruct` or `HF_MODEL_ID=ilsp/Meltemi-7B-Instruct-v1` on a GPU runtime with enough memory.
 
 ---
 
@@ -118,15 +118,32 @@ if str(PROJECT_ROOT) not in sys.path:
 Runtime -> Change runtime type -> T4 GPU
 ```
 
-6. Optional: add `SERPAPI_KEY` in Colab Secrets if you want live course search. Without it, the app still runs, but course search returns a missing-key message.
+6. Optional: choose a model before launching:
 
-7. Run tests:
+```python
+# Colab-safe default. Recommended for the demo.
+%env HF_MODEL_ID=Qwen/Qwen2.5-0.5B-Instruct
+%env HF_MAX_NEW_TOKENS=256
+%env HF_INPUT_MAX_TOKENS=2048
+
+# Better quality, slower.
+# %env HF_MODEL_ID=Qwen/Qwen2.5-1.5B-Instruct
+# %env HF_MAX_NEW_TOKENS=384
+
+# Higher-quality Greek option, but much heavier and may crash small Colab runtimes.
+# %env HF_MODEL_ID=ilsp/Meltemi-7B-Instruct-v1
+# %env HF_MAX_NEW_TOKENS=768
+```
+
+7. Optional: add `SERPAPI_KEY` in Colab Secrets if you want live course search. Without it, the app still runs, but course search returns a missing-key message.
+
+8. Run tests:
 
 ```python
 !PYTHONPATH=$PWD pytest -q
 ```
 
-8. Launch the UI:
+9. Launch the UI:
 
 ```python
 import os
@@ -148,7 +165,7 @@ if str(PROJECT_ROOT) not in sys.path:
 
 from career_advisor.app import demo
 
-demo.launch(share=True, debug=False)
+demo.launch(share=True, debug=True, show_error=True)
 ```
 
 ---
@@ -167,7 +184,7 @@ Run the Gradio app:
 python -m career_advisor.app
 ```
 
-The default Hugging Face model is large, so local usage works best on a machine with a suitable GPU. For CPU-only local runs, use a smaller `HF_MODEL_ID` or switch to `LLM_PROVIDER=gemini`.
+The default Hugging Face model is intentionally small enough for demos. For higher-quality output, use `HF_MODEL_ID=Qwen/Qwen2.5-1.5B-Instruct` or `HF_MODEL_ID=ilsp/Meltemi-7B-Instruct-v1` on a machine with a suitable GPU, or switch to `LLM_PROVIDER=gemini`.
 
 Run tests:
 
@@ -179,9 +196,10 @@ Useful environment variables:
 
 ```text
 LLM_PROVIDER=hf
-HF_MODEL_ID=ilsp/Meltemi-7B-Instruct-v1
+HF_MODEL_ID=Qwen/Qwen2.5-0.5B-Instruct
 HF_USE_4BIT=true
-HF_MAX_NEW_TOKENS=768
+HF_MAX_NEW_TOKENS=256
+HF_INPUT_MAX_TOKENS=2048
 HF_TEMPERATURE=0.2
 HF_TOP_P=0.9
 SERPAPI_KEY=

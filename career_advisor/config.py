@@ -19,8 +19,9 @@ PREFS_FILE = DATA_DIR / "user_personalization.json"
 RESUME_TIPS_PATH = DATA_DIR / "resume_tips.txt"
 
 LLM_PROVIDER = os.getenv("LLM_PROVIDER", "hf").lower()
-HF_MODEL_ID = os.getenv("HF_MODEL_ID", "ilsp/Meltemi-7B-Instruct-v1")
-HF_MAX_NEW_TOKENS = int(os.getenv("HF_MAX_NEW_TOKENS", "768"))
+HF_MODEL_ID = os.getenv("HF_MODEL_ID", "Qwen/Qwen2.5-0.5B-Instruct")
+HF_MAX_NEW_TOKENS = int(os.getenv("HF_MAX_NEW_TOKENS", "256"))
+HF_INPUT_MAX_TOKENS = int(os.getenv("HF_INPUT_MAX_TOKENS", "2048"))
 HF_TEMPERATURE = float(os.getenv("HF_TEMPERATURE", "0.2"))
 HF_TOP_P = float(os.getenv("HF_TOP_P", "0.9"))
 HF_USE_4BIT = os.getenv("HF_USE_4BIT", "true").lower() in {"1", "true", "yes"}
