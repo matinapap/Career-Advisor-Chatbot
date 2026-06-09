@@ -1,0 +1,22 @@
+gradio>=5.0,<6
+PyPDF2>=3.0,<4
+pydantic>=2.7,<3
+pytest>=8.0,<9
+requests>=2.31,<3
+
+# Open-source local LLM runtime for Google Colab.
+torch>=2.2,<3
+transformers>=4.44,<5
+accelerate>=0.34,<2
+bitsandbytes>=0.43,<1; platform_system == "Linux"
+
+# LangGraph + RAG stack.
+langgraph>=0.2,<1
+langchain-community>=0.3,<0.4
+langchain-core>=0.3,<0.4
+langchain-text-splitters>=0.3,<0.4
+faiss-cpu>=1.8,<2
+sentence-transformers>=3.0,<6
+
+# Optional only if LLM_PROVIDER=gemini.
+google-generativeai>=0.8,<1
