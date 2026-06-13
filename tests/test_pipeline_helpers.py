@@ -1,3 +1,5 @@
+import pytest
+
 from career_advisor.pipeline import node_wrapper, resume_feedback_node, suggest_roles_node
 from career_advisor.schemas import CareerRole, CareerSuggestions
 
@@ -11,14 +13,14 @@ def test_node_wrapper_writes_successful_output():
     assert result["skills"] == "PYTHON"
 
 
-def test_node_wrapper_writes_error_message():
+def test_node_wrapper_raises_node_errors():
     def fail(_profile):
         raise RuntimeError("boom")
 
     node = node_wrapper("skills", fail, "profile")
-    result = node({"profile": "python"})
 
-    assert "Σφάλμα στο skills" in result["skills"]
+    with pytest.raises(RuntimeError, match="skills"):
+        node({"profile": "python"})
 
 
 def test_suggest_roles_node_uses_structured_first_role(monkeypatch):

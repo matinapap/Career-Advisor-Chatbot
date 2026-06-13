@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import logging
 from typing import Optional, TypedDict
 
 from langgraph.graph import END, StateGraph
@@ -24,6 +25,9 @@ from career_advisor.preferences import (
 from career_advisor.text_utils import clean_output
 
 
+logger = logging.getLogger(__name__)
+
+
 class AgentState(TypedDict):
     profile: str
     resume_text: str
@@ -43,7 +47,8 @@ def node_wrapper(output_key, func, *input_keys):
             inputs = [state.get(key, "") for key in input_keys]
             state[output_key] = func(*inputs)
         except Exception as exc:
-            state[output_key] = f"(Σφάλμα στο {output_key}: {exc})"
+            logger.exception("Pipeline node failed while writing %r.", output_key)
+            raise RuntimeError(f"Pipeline node failed while writing {output_key!r}.") from exc
         return state
 
     return wrapper
@@ -61,7 +66,7 @@ def resume_feedback_node(state: AgentState):
     if state.get("resume_text"):
         state["resume_feedback"] = suggest_resume_improvements(state["resume_text"])
     else:
-        state["resume_feedback"] = "(Δεν υποβλήθηκε βιογραφικό)"
+        state["resume_feedback"] = "(No resume was submitted.)"
     return state
 
 
@@ -144,11 +149,9 @@ def full_pipeline(
     user_profile: str,
     chosen_role: str = "",
     resume_file=None,
-    session_state: Optional[dict] = None,
     mode: str = "default",
     learning_style: Optional[str] = None,
     career_goals: Optional[str] = None,
-    personalized: bool = False,
 ):
     learning_style_default, career_goals_default = load_personalization_preferences()
     learning_style = learning_style or learning_style_default

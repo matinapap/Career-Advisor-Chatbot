@@ -13,5 +13,5 @@ def extract_text_from_pdf(pdf_path: str) -> str:
             for page in reader.pages:
                 text += page.extract_text() or ""
     except Exception as exc:
-        text = f"(Σφάλμα στην ανάγνωση PDF: {exc})"
+        text = f"(PDF reading error: {exc})"
     return text

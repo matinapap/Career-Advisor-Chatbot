@@ -76,14 +76,14 @@ def get_hf_model():
     return _hf_model, _hf_tokenizer
 
 
-def llm_run(prompt: str, safety_fallback: str = "(Δεν υπάρχει απάντηση)") -> str:
+def llm_run(prompt: str, safety_fallback: str = "(No answer available)") -> str:
     try:
         if LLM_PROVIDER == "gemini":
             response = get_gemini_model().generate_content(prompt)
             return getattr(response, "text", None) or safety_fallback
         return hf_generate(prompt)
     except Exception as exc:
-        return f"{safety_fallback}\n\n(Σφάλμα: {exc})"
+        return f"{safety_fallback}\n\n(Error: {exc})"
 
 
 def hf_generate(prompt: str) -> str:
