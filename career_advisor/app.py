@@ -5,13 +5,15 @@ import logging
 import gradio as gr
 
 from career_advisor.pipeline import full_pipeline
-from career_advisor.preferences import (
-    init_preferences_file,
-    load_personalization_preferences,
-)
+from career_advisor.preferences import default_personalization_preferences
 
 
 logger = logging.getLogger(__name__)
+
+MAX_PROFILE_CHARS = 5000
+MAX_ROLE_CHARS = 100
+MAX_CAREER_GOALS_CHARS = 500
+MAX_UPLOAD_SIZE = "5mb"
 
 
 def run_pipeline_for_ui(
@@ -28,6 +30,14 @@ def run_pipeline_for_ui(
         logger.info("Empty profile submitted; stopping.")
         yield "⚠️ Please add your profile/description before submitting.", session_state
         return
+    if len(user_profile) > MAX_PROFILE_CHARS:
+        yield (
+            f"⚠️ Please keep your profile under {MAX_PROFILE_CHARS} characters.",
+            session_state,
+        )
+        return
+    chosen_role = (chosen_role or "")[:MAX_ROLE_CHARS]
+    career_goals = (career_goals or "")[:MAX_CAREER_GOALS_CHARS]
 
     logger.info("Running career advisor pipeline with mode=%r.", mode)
     yield (
@@ -46,9 +56,9 @@ def run_pipeline_for_ui(
             learning_style=learning_style,
             career_goals=career_goals,
         )
-    except Exception as exc:
+    except Exception:
         logger.exception("Pipeline error.")
-        yield f"❌ Pipeline error:\n\n```text\n{exc}\n```", session_state
+        yield "❌ Something went wrong while generating your results. Please try again.", session_state
         return
 
     logger.info("Pipeline completed.")
@@ -58,7 +68,7 @@ def run_pipeline_for_ui(
 def toggle_personalization_fields(mode):
     show = mode == "personalized"
     if show:
-        learning_style, career_goals = load_personalization_preferences()
+        learning_style, career_goals = default_personalization_preferences()
         return gr.update(visible=True, value=learning_style), gr.update(
             visible=True, value=career_goals
         )
@@ -69,14 +79,23 @@ def clear_form():
     return "", "", None, "default", gr.update(visible=False), gr.update(visible=False), "", None
 
 
-init_preferences_file()
-default_learning_style, default_career_goals = load_personalization_preferences()
+default_learning_style, default_career_goals = default_personalization_preferences()
 
 with gr.Blocks(css=".gr-button { width: 100% !important; }") as demo:
     output_md = gr.Markdown(label="📊 Αποτελέσματα")
 
-    profile = gr.Textbox(lines=8, label="🔍 Προφίλ / Περιγραφή", interactive=True)
-    role = gr.Textbox(lines=1, label="🎯 Επιλεγμένος Ρόλος (προαιρετικά)", interactive=True)
+    profile = gr.Textbox(
+        lines=8,
+        label="🔍 Προφίλ / Περιγραφή",
+        interactive=True,
+        max_length=MAX_PROFILE_CHARS,
+    )
+    role = gr.Textbox(
+        lines=1,
+        label="🎯 Επιλεγμένος Ρόλος (προαιρετικά)",
+        interactive=True,
+        max_length=MAX_ROLE_CHARS,
+    )
     resume = gr.File(label="📄 Βιογραφικό (PDF)", file_types=[".pdf"])
     mode_dropdown = gr.Dropdown(
         ["default", "interview", "personalized"],
@@ -93,6 +112,7 @@ with gr.Blocks(css=".gr-button { width: 100% !important; }") as demo:
         label="🎯 Στόχοι Καριέρας",
         value=default_career_goals,
         visible=False,
+        max_length=MAX_CAREER_GOALS_CHARS,
     )
 
     mode_dropdown.change(
@@ -138,4 +158,4 @@ demo.queue(default_concurrency_limit=1)
 
 if __name__ == "__main__":
     logging.basicConfig(level=logging.INFO)
-    demo.launch(share=False, debug=False)
+    demo.launch(share=False, debug=False, max_file_size=MAX_UPLOAD_SIZE)

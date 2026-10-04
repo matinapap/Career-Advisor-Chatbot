@@ -18,10 +18,7 @@ from career_advisor.agents import (
     suggest_resume_improvements,
 )
 from career_advisor.pdf import extract_text_from_pdf
-from career_advisor.preferences import (
-    load_personalization_preferences,
-    save_user_preferences,
-)
+from career_advisor.preferences import default_personalization_preferences
 from career_advisor.text_utils import clean_output
 
 
@@ -66,7 +63,7 @@ def resume_feedback_node(state: AgentState):
     if state.get("resume_text"):
         state["resume_feedback"] = suggest_resume_improvements(state["resume_text"])
     else:
-        state["resume_feedback"] = "(No resume was submitted.)"
+        state["resume_feedback"] = "(Δεν υποβλήθηκε βιογραφικό)"
     return state
 
 
@@ -153,10 +150,11 @@ def full_pipeline(
     learning_style: Optional[str] = None,
     career_goals: Optional[str] = None,
 ):
-    learning_style_default, career_goals_default = load_personalization_preferences()
+    learning_style_default, career_goals_default = default_personalization_preferences()
     learning_style = learning_style or learning_style_default
     career_goals = career_goals or career_goals_default
 
+    chosen_role = chosen_role or ""
     resume_text = ""
     if resume_file:
         resume_path = getattr(resume_file, "name", resume_file)
@@ -166,7 +164,7 @@ def full_pipeline(
     initial_state: AgentState = {
         "profile": user_profile,
         "resume_text": resume_text,
-        "role": chosen_role or "",
+        "role": chosen_role,
         "skills": "",
         "suggested_roles": "",
         "learning_plan": "",
@@ -196,7 +194,6 @@ def full_pipeline(
 """
     elif mode == "personalized":
         final_state = personalized_graph.invoke(initial_state)
-        save_user_preferences(learning_style, career_goals)
         result_markdown = final_state["learning_plan"]
     elif mode == "interview":
         final_state = interview_graph.invoke(initial_state)

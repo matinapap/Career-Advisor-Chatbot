@@ -42,7 +42,11 @@ def search_courses(skill: str, max_results: int = 3) -> str:
                 link = item.get("link")
                 if title and link:
                     results_out.append(f"- [{title}]({link})")
-        except requests.RequestException:
-            logger.exception("SerpAPI request failed for site=%s.", site)
+        except requests.RequestException as exc:
+            # Log only the exception type: requests error messages include the
+            # full request URL, which contains the SerpAPI key.
+            logger.warning(
+                "SerpAPI request failed for site=%s (%s).", site, type(exc).__name__
+            )
             continue
     return "\n".join(results_out) if results_out else f"(No courses found for: {skill})"

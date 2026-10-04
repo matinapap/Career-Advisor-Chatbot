@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+import logging
 import re
 from typing import TypeVar
 
@@ -20,6 +21,8 @@ from career_advisor.config import (
     get_gemini_api_key,
 )
 
+
+logger = logging.getLogger(__name__)
 
 T = TypeVar("T", bound=BaseModel)
 _gemini_model = None
@@ -52,7 +55,7 @@ def get_hf_model():
     from transformers import AutoModelForCausalLM, AutoTokenizer
 
     _hf_tokenizer = AutoTokenizer.from_pretrained(HF_MODEL_ID)
-    model_kwargs = {"trust_remote_code": True}
+    model_kwargs = {}
 
     if torch.cuda.is_available():
         model_kwargs["device_map"] = "auto"
@@ -82,8 +85,9 @@ def llm_run(prompt: str, safety_fallback: str = "(No answer available)") -> str:
             response = get_gemini_model().generate_content(prompt)
             return getattr(response, "text", None) or safety_fallback
         return hf_generate(prompt)
-    except Exception as exc:
-        return f"{safety_fallback}\n\n(Error: {exc})"
+    except Exception:
+        logger.exception("LLM generation failed.")
+        return safety_fallback
 
 
 def hf_generate(prompt: str) -> str:

@@ -36,7 +36,7 @@ career_advisor/
   llm.py                      # Hugging Face/Gemini LLM access and JSON parsing
   pdf.py                      # PDF text extraction
   pipeline.py                 # LangGraph pipeline orchestration
-  preferences.py              # Local personalization preferences
+  preferences.py              # Default personalization preferences
   prompts.py                  # Prompt builders
   rag.py                      # Resume tips FAISS/RAG utilities
   schemas.py                  # Pydantic schemas for structured LLM output
@@ -50,7 +50,7 @@ requirements.txt              # Python dependencies
 Presentation.pdf              # Project presentation
 ```
 
-Runtime files such as `career_advisor_files/user_personalization.json` are intentionally ignored by git.
+Personalization preferences are kept per browser session and are never written to disk, so users of a shared demo link cannot see each other's data.
 
 ---
 
@@ -165,7 +165,7 @@ if str(PROJECT_ROOT) not in sys.path:
 
 from career_advisor.app import demo
 
-demo.launch(share=True, debug=True, show_error=True)
+demo.launch(share=True, debug=True, max_file_size="5mb")
 ```
 
 ---

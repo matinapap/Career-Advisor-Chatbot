@@ -1,5 +1,5 @@
 gradio>=5.0,<6
-PyPDF2>=3.0,<4
+pypdf>=5.1,<7
 pydantic>=2.7,<3
 pytest>=8.0,<9
 # Keep aligned with Google Colab's pinned dependency.

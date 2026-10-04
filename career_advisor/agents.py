@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import logging
 from typing import Optional
 
 from career_advisor.courses import search_courses
@@ -21,6 +22,9 @@ from career_advisor.schemas import CareerRole, CareerSuggestions, SkillKeywords
 from career_advisor.text_utils import clean_output
 
 
+logger = logging.getLogger(__name__)
+
+
 def analyze_profile(user_profile: str) -> str:
     return llm_run(analyze_profile_prompt(user_profile))
 
@@ -32,12 +36,13 @@ def suggest_careers_structured(skills_summary: str) -> CareerSuggestions:
             career_suggestions_prompt(skills_summary),
             CareerSuggestions,
         )
-    except Exception as exc:
+    except Exception:
+        logger.exception("Structured career suggestions failed.")
         return CareerSuggestions(
             roles=[
                 CareerRole(
                     title="No role",
-                    why_it_fits=f"Δεν ήταν δυνατή η δομημένη παραγωγή ρόλων: {exc}",
+                    why_it_fits="Δεν ήταν δυνατή η δομημένη παραγωγή ρόλων.",
                     required_skills=[],
                     next_steps=["Δοκίμασε ξανά με πιο αναλυτικό προφίλ."],
                 )
